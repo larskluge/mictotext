@@ -6,7 +6,7 @@ import { transcribe } from '../src/transcriber.js';
 import { checkServer } from '../src/server-check.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const fixtureWav = path.join(__dirname, 'fixtures', 'test-recording.wav');
+const fixtureWav = path.join(__dirname, 'fixtures', 'sine-440hz-9s.wav');
 
 let serverAvailable = false;
 try {
