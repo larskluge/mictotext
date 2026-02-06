@@ -16,12 +16,17 @@ export async function run(options = {}) {
   };
 
   // 1. Check server
-  write(stderr, 'Checking whisper server...\n');
-  await checkServer();
-  write(stderr, 'Server ready.\n');
+  write(stderr, 'Checking whisper server...');
+  try {
+    await checkServer();
+  } catch (err) {
+    write(stderr, '\n');
+    throw err;
+  }
+  write(stderr, ' ready.');
 
   // 2. Record
-  write(stderr, 'Recording... (press Ctrl-C to stop)\n');
+  write(stderr, ' Recording now... (press Ctrl-C to stop)\n');
 
   let filePath;
   try {

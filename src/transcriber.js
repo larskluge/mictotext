@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import OpenAI from 'openai';
 
 export async function transcribe(filePath, options = {}) {
   const { baseUrl = 'http://localhost:50060' } = options;
@@ -8,6 +7,7 @@ export async function transcribe(filePath, options = {}) {
     throw new Error(`Audio file not found: ${filePath}`);
   }
 
+  const { default: OpenAI } = await import('openai');
   const client = new OpenAI({
     baseURL: `${baseUrl}/v1`,
     apiKey: 'not-needed',

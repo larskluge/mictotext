@@ -2,7 +2,7 @@ export async function checkServer(baseUrl = 'http://localhost:50060') {
   let res;
   try {
     res = await fetch(`${baseUrl}/health`, {
-      signal: AbortSignal.timeout(3000),
+      signal: AbortSignal.timeout(1000),
     });
   } catch (err) {
     throw new Error(`Whisper server not running at ${baseUrl}: ${err.message}`);
