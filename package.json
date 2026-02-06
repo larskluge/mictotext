@@ -1,0 +1,15 @@
+{
+  "name": "mictotext",
+  "version": "1.0.0",
+  "description": "Record audio from Mac microphone and transcribe locally via whisperkit-cli",
+  "type": "module",
+  "bin": {
+    "mictotext": "./bin/mictotext.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "openai": "^4"
+  }
+}
