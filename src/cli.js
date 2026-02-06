@@ -11,7 +11,9 @@ export async function run(options = {}) {
     maxDurationSec,
   } = options;
 
-  const write = (stream, msg) => stream.write(msg);
+  const write = (stream, msg) => {
+    try { return stream.write(msg); } catch { return false; /* EPIPE — pipe closed */ }
+  };
 
   // 1. Check server
   write(stderr, 'Checking whisper server...\n');
@@ -37,7 +39,10 @@ export async function run(options = {}) {
     write(stderr, 'Transcribing...\n');
     const result = await transcribe(filePath);
 
-    write(stdout, result.text + '\n');
+    if (!write(stdout, result.text + '\n')) {
+      // Pipe broken (e.g. Ctrl-C killed downstream process) — print to stderr
+      write(stderr, `Transcript: ${result.text}\n`);
+    }
     write(stderr, `Transcription took ${result.transcriptionTimeSec.toFixed(2)}s\n`);
   } finally {
     // 4. Cleanup
