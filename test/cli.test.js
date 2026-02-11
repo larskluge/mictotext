@@ -83,7 +83,7 @@ describe('cli', () => {
       assert.fail('should have exited with non-zero code');
     } catch (err) {
       assert.ok(err.stderr, 'should have stderr output');
-      assert.match(err.stderr, /whisperkit-cli serve/);
+      assert.match(err.stderr, /mictotext serve/);
       assert.doesNotMatch(err.stderr, /^\s+at /m, 'should not contain stack trace');
       assert.notEqual(err.code, 0);
     }

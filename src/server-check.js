@@ -7,7 +7,7 @@ export async function checkServer(baseUrl = DEFAULT_BASE_URL) {
       signal: AbortSignal.timeout(1000),
     });
   } catch (err) {
-    throw new Error(`Whisper server not running at ${baseUrl}.\nStart it with: whisperkit-cli serve --port ${DEFAULT_PORT}`);
+    throw new Error(`Whisper server not running at ${baseUrl}.\nStart it with: mictotext serve`);
   }
 
   if (!res.ok) {
