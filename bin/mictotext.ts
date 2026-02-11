@@ -1,10 +1,44 @@
 #!/usr/bin/env node
+import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { DEFAULT_PORT } from '../src/config.ts';
 import { run } from '../src/cli.ts';
 
-if (process.argv[2] === 'serve') {
+const require = createRequire(import.meta.url);
+const { version } = require('../package.json') as { version: string };
+
+const HELP = `mictotext v${version}
+
+Record audio from Mac microphone and transcribe locally via whisperkit-cli.
+
+Usage:
+  mictotext                  Record and transcribe (default)
+  mictotext serve            Start the whisperkit-cli server
+  mictotext help             Show this help message
+  mictotext version          Show version
+
+Options:
+  -d, --max-duration <sec>   Maximum recording duration in seconds
+  -h, --help                 Show this help message
+  -v, --version              Show version
+`;
+
+function printHelp(): void {
+  process.stdout.write(HELP);
+}
+
+function printVersion(): void {
+  process.stdout.write(`mictotext v${version}\n`);
+}
+
+const cmd = process.argv[2];
+
+if (cmd === 'help' || cmd === '--help' || cmd === '-h') {
+  printHelp();
+} else if (cmd === 'version' || cmd === '--version' || cmd === '-v') {
+  printVersion();
+} else if (cmd === 'serve') {
   const child = spawn('whisperkit-cli', ['serve', '--port', String(DEFAULT_PORT)], {
     stdio: 'inherit',
   });
@@ -13,13 +47,22 @@ if (process.argv[2] === 'serve') {
     process.exit(1);
   });
   child.on('exit', (code: number | null) => process.exit(code ?? 1));
+} else if (cmd && !cmd.startsWith('-')) {
+  process.stderr.write(`Unknown command: ${cmd}\n\n`);
+  process.stderr.write(HELP);
+  process.exit(1);
 } else {
   const { values } = parseArgs({
     options: {
       'max-duration': { type: 'string', short: 'd' },
+      'help': { type: 'boolean', short: 'h' },
+      'version': { type: 'boolean', short: 'v' },
     },
     strict: false,
   });
+
+  if (values.help) { printHelp(); process.exit(0); }
+  if (values.version) { printVersion(); process.exit(0); }
 
   const maxDurationSec: number | undefined = values['max-duration'] ? Number(values['max-duration']) : undefined;
 

@@ -27,6 +27,36 @@ try {
   // server not running
 }
 
+describe('cli help and version', () => {
+  for (const arg of ['help', '--help', '-h']) {
+    it(`"${arg}" prints usage and exits 0`, async () => {
+      const { stdout } = await execFileAsync('node', ['bin/mictotext.ts', arg]);
+      assert.match(stdout, /Usage:/);
+      assert.match(stdout, /mictotext serve/);
+      assert.match(stdout, /--max-duration/);
+    });
+  }
+
+  it('unknown subcommand prints help to stderr and exits 1', async () => {
+    try {
+      await execFileAsync('node', ['bin/mictotext.ts', 'hi']);
+      assert.fail('should have exited with non-zero code');
+    } catch (e) {
+      const err = e as { stderr: string; code: number };
+      assert.match(err.stderr, /Unknown command: hi/);
+      assert.match(err.stderr, /Usage:/);
+      assert.notEqual(err.code, 0);
+    }
+  });
+
+  for (const arg of ['version', '--version', '-v']) {
+    it(`"${arg}" prints version and exits 0`, async () => {
+      const { stdout } = await execFileAsync('node', ['bin/mictotext.ts', arg]);
+      assert.match(stdout, /^mictotext v\d+\.\d+\.\d+\n$/);
+    });
+  }
+});
+
 describe('cli', () => {
   it('prints transcript to stdout and stats to stderr', {
     skip: !serverAvailable && 'whisper server not running',
