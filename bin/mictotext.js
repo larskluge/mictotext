@@ -40,6 +40,9 @@ process.on('SIGINT', stop);
 
 try {
   await run({ signal: ac.signal, maxDurationSec });
+} catch (err) {
+  process.stderr.write(`Error: ${err.message}\n`);
+  process.exitCode = 1;
 } finally {
   if (process.stdin.isTTY) {
     process.stdin.setRawMode(false);

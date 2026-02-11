@@ -1,11 +1,13 @@
-export async function checkServer(baseUrl = 'http://localhost:50060') {
+import { DEFAULT_PORT, DEFAULT_BASE_URL } from './config.js';
+
+export async function checkServer(baseUrl = DEFAULT_BASE_URL) {
   let res;
   try {
     res = await fetch(`${baseUrl}/health`, {
       signal: AbortSignal.timeout(1000),
     });
   } catch (err) {
-    throw new Error(`Whisper server not running at ${baseUrl}: ${err.message}`);
+    throw new Error(`Whisper server not running at ${baseUrl}.\nStart it with: whisperkit-cli serve --port ${DEFAULT_PORT}`);
   }
 
   if (!res.ok) {

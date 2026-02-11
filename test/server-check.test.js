@@ -33,6 +33,7 @@ describe('checkServer', () => {
       () => checkServer('http://localhost:19999'),
       (err) => {
         assert.match(err.message, /not running|ECONNREFUSED|fetch failed/i);
+        assert.match(err.message, /whisperkit-cli serve/);
         return true;
       }
     );

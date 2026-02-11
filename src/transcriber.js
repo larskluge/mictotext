@@ -1,7 +1,8 @@
 import fs from 'node:fs';
+import { DEFAULT_BASE_URL } from './config.js';
 
 export async function transcribe(filePath, options = {}) {
-  const { baseUrl = 'http://localhost:50060' } = options;
+  const { baseUrl = DEFAULT_BASE_URL } = options;
 
   if (!fs.existsSync(filePath)) {
     throw new Error(`Audio file not found: ${filePath}`);

@@ -1,8 +1,12 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { Writable } from 'node:stream';
 import { checkServer } from '../src/server-check.js';
 import { run } from '../src/cli.js';
+
+const execFileAsync = promisify(execFile);
 
 function collectStream() {
   let data = '';
@@ -68,6 +72,20 @@ describe('cli', () => {
           return true;
         }
       );
+    }
+  });
+
+  it('bin entry prints clean error to stderr when server is down', {
+    skip: serverAvailable && 'server is running, cannot test down path',
+  }, async () => {
+    try {
+      await execFileAsync('node', ['bin/mictotext.js']);
+      assert.fail('should have exited with non-zero code');
+    } catch (err) {
+      assert.ok(err.stderr, 'should have stderr output');
+      assert.match(err.stderr, /whisperkit-cli serve/);
+      assert.doesNotMatch(err.stderr, /^\s+at /m, 'should not contain stack trace');
+      assert.notEqual(err.code, 0);
     }
   });
 
