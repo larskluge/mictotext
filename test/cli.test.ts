@@ -52,7 +52,7 @@ describe('cli help and version', () => {
   for (const arg of ['version', '--version', '-v']) {
     it(`"${arg}" prints version and exits 0`, async () => {
       const { stdout } = await execFileAsync('node', ['bin/mictotext.ts', arg]);
-      assert.match(stdout, /^mictotext v\d+\.\d+\.\d+\n$/);
+      assert.match(stdout, /^mictotext v\d+\.\d+\.\d+(-dirty)?\n$/);
     });
   }
 });

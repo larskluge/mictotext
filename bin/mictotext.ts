@@ -1,12 +1,11 @@
 #!/usr/bin/env node
-import { createRequire } from 'node:module';
 import { spawn } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { DEFAULT_PORT } from '../src/config.ts';
 import { run } from '../src/cli.ts';
+import { getVersion } from '../src/version.ts';
 
-const require = createRequire(import.meta.url);
-const { version } = require('../package.json') as { version: string };
+const version = getVersion();
 
 const HELP = `mictotext v${version}
 

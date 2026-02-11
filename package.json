@@ -1,6 +1,6 @@
 {
   "name": "mictotext",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Record audio from Mac microphone and transcribe locally via whisperkit-cli",
   "type": "module",
   "bin": {
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "node --test test/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "version:sync": "node scripts/sync-version.ts"
   },
   "dependencies": {
     "openai": "^4"
