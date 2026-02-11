@@ -1,7 +1,18 @@
 import fs from 'node:fs';
-import { DEFAULT_BASE_URL } from './config.js';
+import { DEFAULT_BASE_URL } from './config.ts';
 
-export async function transcribe(filePath, options = {}) {
+export interface TranscribeOptions {
+  baseUrl?: string;
+}
+
+export interface TranscribeResult {
+  text: string;
+  language: string;
+  durationSec: number;
+  transcriptionTimeSec: number;
+}
+
+export async function transcribe(filePath: string, options: TranscribeOptions = {}): Promise<TranscribeResult> {
   const { baseUrl = DEFAULT_BASE_URL } = options;
 
   if (!fs.existsSync(filePath)) {
@@ -26,8 +37,8 @@ export async function transcribe(filePath, options = {}) {
 
   return {
     text: response.text,
-    language: response.language,
-    durationSec: response.duration,
+    language: response.language!,
+    durationSec: response.duration!,
     transcriptionTimeSec,
   };
 }

@@ -1,20 +1,20 @@
 import { describe, it, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { createServer } from 'node:http';
-import { checkServer } from '../src/server-check.js';
+import { createServer, type IncomingMessage, type ServerResponse, type Server } from 'node:http';
+import { checkServer } from '../src/server-check.ts';
 
-function startServer(handler) {
+function startServer(handler: (req: IncomingMessage, res: ServerResponse) => void): Promise<{ server: Server; url: string }> {
   return new Promise((resolve) => {
     const server = createServer(handler);
     server.listen(0, () => {
-      const port = server.address().port;
+      const port = (server.address() as { port: number }).port;
       resolve({ server, url: `http://localhost:${port}` });
     });
   });
 }
 
 describe('checkServer', () => {
-  const servers = [];
+  const servers: Server[] = [];
   after(() => {
     for (const s of servers) s.close();
   });
@@ -32,8 +32,8 @@ describe('checkServer', () => {
     await assert.rejects(
       () => checkServer('http://localhost:19999'),
       (err) => {
-        assert.match(err.message, /not running|ECONNREFUSED|fetch failed/i);
-        assert.match(err.message, /mictotext serve/);
+        assert.match((err as Error).message, /not running|ECONNREFUSED|fetch failed/i);
+        assert.match((err as Error).message, /mictotext serve/);
         return true;
       }
     );
@@ -48,7 +48,7 @@ describe('checkServer', () => {
     await assert.rejects(
       () => checkServer(url),
       (err) => {
-        assert.match(err.message, /not healthy|unhealthy|status/i);
+        assert.match((err as Error).message, /not healthy|unhealthy|status/i);
         return true;
       }
     );
@@ -63,7 +63,7 @@ describe('checkServer', () => {
     await assert.rejects(
       () => checkServer(url),
       (err) => {
-        assert.match(err.message, /503|not healthy|unhealthy/i);
+        assert.match((err as Error).message, /503|not healthy|unhealthy/i);
         return true;
       }
     );

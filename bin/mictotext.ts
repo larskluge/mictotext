@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 import { parseArgs } from 'node:util';
-import { DEFAULT_PORT } from '../src/config.js';
-import { run } from '../src/cli.js';
+import { DEFAULT_PORT } from '../src/config.ts';
+import { run } from '../src/cli.ts';
 
 if (process.argv[2] === 'serve') {
   const child = spawn('whisperkit-cli', ['serve', '--port', String(DEFAULT_PORT)], {
     stdio: 'inherit',
   });
-  child.on('error', (err) => {
+  child.on('error', (err: Error) => {
     process.stderr.write(`Error: ${err.message}\n`);
     process.exit(1);
   });
-  child.on('exit', (code) => process.exit(code ?? 1));
+  child.on('exit', (code: number | null) => process.exit(code ?? 1));
 } else {
   const { values } = parseArgs({
     options: {
@@ -21,14 +21,14 @@ if (process.argv[2] === 'serve') {
     strict: false,
   });
 
-  const maxDurationSec = values['max-duration'] ? Number(values['max-duration']) : undefined;
+  const maxDurationSec: number | undefined = values['max-duration'] ? Number(values['max-duration']) : undefined;
 
   process.stdout.on('error', () => {});
 
   const ac = new AbortController();
   let stopping = false;
 
-  function stop() {
+  function stop(): void {
     if (stopping) {
       process.exit(1);
     }
@@ -42,7 +42,7 @@ if (process.argv[2] === 'serve') {
   if (process.stdin.isTTY) {
     process.stdin.setRawMode(true);
     process.stdin.resume();
-    process.stdin.on('data', (data) => {
+    process.stdin.on('data', (data: Buffer) => {
       if (data[0] === 0x03) stop(); // Ctrl-C
     });
   }
@@ -53,7 +53,7 @@ if (process.argv[2] === 'serve') {
   try {
     await run({ signal: ac.signal, maxDurationSec });
   } catch (err) {
-    process.stderr.write(`Error: ${err.message}\n`);
+    process.stderr.write(`Error: ${(err as Error).message}\n`);
     process.exitCode = 1;
   } finally {
     if (process.stdin.isTTY) {

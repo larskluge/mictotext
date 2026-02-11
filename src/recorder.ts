@@ -9,7 +9,18 @@ const execFileAsync = promisify(execFile);
 const WAV_HEADER_SIZE = 44;
 const BYTES_PER_SEC = 32000; // 16kHz * 1 channel * 2 bytes (pcm_s16le)
 
-export async function record(options = {}) {
+export interface RecordOptions {
+  maxDurationSec?: number;
+  signal?: AbortSignal;
+  outputPath?: string;
+}
+
+export interface RecordResult {
+  filePath: string;
+  durationSec: number;
+}
+
+export async function record(options: RecordOptions = {}): Promise<RecordResult> {
   const { maxDurationSec, signal, outputPath } = options;
 
   const filePath =
@@ -30,7 +41,7 @@ export async function record(options = {}) {
 
   args.push('-y', filePath);
 
-  await new Promise((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     // detached: true puts ffmpeg in its own process group so terminal
     // Ctrl-C doesn't kill it directly — we send SIGINT ourselves, giving
     // ffmpeg time to finalize the WAV header before exiting.
@@ -38,7 +49,7 @@ export async function record(options = {}) {
 
     child.on('error', reject);
 
-    child.on('close', (code) => {
+    child.on('close', (code: number | null) => {
       // ffmpeg exits 255 when killed by SIGINT, which is expected
       if (code === 0 || code === 255 || code === null) {
         resolve();
@@ -64,7 +75,7 @@ export async function record(options = {}) {
   return { filePath, durationSec };
 }
 
-async function getDuration(filePath) {
+async function getDuration(filePath: string): Promise<number> {
   try {
     const { stdout } = await execFileAsync('ffprobe', [
       '-v', 'error',

@@ -3,15 +3,15 @@ import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { Writable } from 'node:stream';
-import { checkServer } from '../src/server-check.js';
-import { run } from '../src/cli.js';
+import { checkServer } from '../src/server-check.ts';
+import { run } from '../src/cli.ts';
 
 const execFileAsync = promisify(execFile);
 
-function collectStream() {
+function collectStream(): { stream: Writable; getData: () => string } {
   let data = '';
   const stream = new Writable({
-    write(chunk, _encoding, callback) {
+    write(chunk: Buffer, _encoding: string, callback: () => void) {
       data += chunk.toString();
       callback();
     },
@@ -68,7 +68,7 @@ describe('cli', () => {
       await assert.rejects(
         () => run({ stdout: stdout.stream, stderr: stderr.stream }),
         (err) => {
-          assert.ok(err.message);
+          assert.ok((err as Error).message);
           return true;
         }
       );
@@ -79,9 +79,10 @@ describe('cli', () => {
     skip: serverAvailable && 'server is running, cannot test down path',
   }, async () => {
     try {
-      await execFileAsync('node', ['bin/mictotext.js']);
+      await execFileAsync('node', ['bin/mictotext.ts']);
       assert.fail('should have exited with non-zero code');
-    } catch (err) {
+    } catch (e) {
+      const err = e as { stderr: string; code: number };
       assert.ok(err.stderr, 'should have stderr output');
       assert.match(err.stderr, /mictotext serve/);
       assert.doesNotMatch(err.stderr, /^\s+at /m, 'should not contain stack trace');

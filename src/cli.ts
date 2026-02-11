@@ -1,9 +1,17 @@
 import fs from 'node:fs/promises';
-import { checkServer } from './server-check.js';
-import { record } from './recorder.js';
-import { transcribe } from './transcriber.js';
+import type { Writable } from 'node:stream';
+import { checkServer } from './server-check.ts';
+import { record } from './recorder.ts';
+import { transcribe } from './transcriber.ts';
 
-export async function run(options = {}) {
+export interface RunOptions {
+  stdout?: Writable;
+  stderr?: Writable;
+  signal?: AbortSignal;
+  maxDurationSec?: number;
+}
+
+export async function run(options: RunOptions = {}): Promise<void> {
   const {
     stdout = process.stdout,
     stderr = process.stderr,
@@ -11,7 +19,7 @@ export async function run(options = {}) {
     maxDurationSec,
   } = options;
 
-  const write = (stream, msg) => {
+  const write = (stream: Writable, msg: string): boolean => {
     try { return stream.write(msg); } catch { return false; /* EPIPE — pipe closed */ }
   };
 
@@ -28,7 +36,7 @@ export async function run(options = {}) {
   // 2. Record
   write(stderr, ' Recording now... (press Ctrl-C to stop)\n');
 
-  let filePath;
+  let filePath: string | undefined;
   try {
     const recordResult = await record({ signal, maxDurationSec });
     filePath = recordResult.filePath;

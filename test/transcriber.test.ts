@@ -2,8 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { transcribe } from '../src/transcriber.js';
-import { checkServer } from '../src/server-check.js';
+import { transcribe } from '../src/transcriber.ts';
+import { checkServer } from '../src/server-check.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fixtureWav = path.join(__dirname, 'fixtures', 'sine-440hz-9s.wav');
@@ -32,7 +32,7 @@ describe('transcribe', () => {
     await assert.rejects(
       () => transcribe('/tmp/nonexistent-audio-file.wav'),
       (err) => {
-        assert.ok(err.message);
+        assert.ok((err as Error).message);
         return true;
       }
     );
@@ -42,7 +42,7 @@ describe('transcribe', () => {
     await assert.rejects(
       () => transcribe(fixtureWav, { baseUrl: 'http://localhost:19999' }),
       (err) => {
-        assert.ok(err.message);
+        assert.ok((err as Error).message);
         return true;
       }
     );

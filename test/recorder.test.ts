@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { record } from '../src/recorder.js';
+import { record } from '../src/recorder.ts';
 
 describe('record', () => {
   it('creates WAV file at specified output path', async () => {
@@ -76,7 +76,7 @@ describe('record', () => {
       await assert.rejects(
         () => record({ signal: AbortSignal.timeout(1000) }),
         (err) => {
-          assert.match(err.message, /ENOENT|not found|ffmpeg/i);
+          assert.match((err as Error).message, /ENOENT|not found|ffmpeg/i);
           return true;
         }
       );

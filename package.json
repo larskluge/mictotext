@@ -4,12 +4,17 @@
   "description": "Record audio from Mac microphone and transcribe locally via whisperkit-cli",
   "type": "module",
   "bin": {
-    "mictotext": "./bin/mictotext.js"
+    "mictotext": "./bin/mictotext.ts"
   },
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "openai": "^4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.11",
+    "typescript": "~5.8"
   }
 }
