@@ -2,7 +2,7 @@
 import { spawn } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { DEFAULT_PORT } from '../src/config.ts';
-import { run } from '../src/cli.ts';
+import { run, transcribeFile } from '../src/cli.ts';
 import { getVersion } from '../src/version.ts';
 
 const version = getVersion();
@@ -12,15 +12,16 @@ const HELP = `mictotext v${version}
 Record audio from Mac microphone and transcribe locally via whisperkit-cli.
 
 Usage:
-  mictotext                  Record and transcribe (default)
-  mictotext serve            Start the whisperkit-cli server
-  mictotext help             Show this help message
-  mictotext version          Show version
+  mictotext                    Record and transcribe (default)
+  mictotext transcribe <file>  Transcribe an existing audio file
+  mictotext serve              Start the whisperkit-cli server
+  mictotext help               Show this help message
+  mictotext version            Show version
 
 Options:
-  -d, --max-duration <sec>   Maximum recording duration in seconds
-  -h, --help                 Show this help message
-  -v, --version              Show version
+  -d, --max-duration <sec>     Maximum recording duration in seconds
+  -h, --help                   Show this help message
+  -v, --version                Show version
 `;
 
 function printHelp(): void {
@@ -37,6 +38,19 @@ if (cmd === 'help' || cmd === '--help' || cmd === '-h') {
   printHelp();
 } else if (cmd === 'version' || cmd === '--version' || cmd === '-v') {
   printVersion();
+} else if (cmd === 'transcribe') {
+  const filePath = process.argv[3];
+  if (!filePath) {
+    process.stderr.write('Usage: mictotext transcribe <audio file>\n');
+    process.exit(1);
+  }
+  process.stdout.on('error', () => {});
+  try {
+    await transcribeFile(filePath);
+  } catch (err) {
+    process.stderr.write(`Error: ${(err as Error).message}\n`);
+    process.exit(1);
+  }
 } else if (cmd === 'serve') {
   const child = spawn('whisperkit-cli', ['serve', '--port', String(DEFAULT_PORT)], {
     stdio: 'inherit',

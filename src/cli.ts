@@ -11,6 +11,39 @@ export interface RunOptions {
   maxDurationSec?: number;
 }
 
+export interface TranscribeFileOptions {
+  stdout?: Writable;
+  stderr?: Writable;
+}
+
+export async function transcribeFile(filePath: string, options: TranscribeFileOptions = {}): Promise<void> {
+  const {
+    stdout = process.stdout,
+    stderr = process.stderr,
+  } = options;
+
+  const write = (stream: Writable, msg: string): boolean => {
+    try { return stream.write(msg); } catch { return false; }
+  };
+
+  write(stderr, 'Checking whisper server...');
+  try {
+    await checkServer();
+  } catch (err) {
+    write(stderr, '\n');
+    throw err;
+  }
+  write(stderr, ' ready.\n');
+
+  write(stderr, 'Transcribing...\n');
+  const result = await transcribe(filePath);
+
+  if (!write(stdout, result.text + '\n')) {
+    write(stderr, `Transcript: ${result.text}\n`);
+  }
+  write(stderr, `Transcription took ${result.transcriptionTimeSec.toFixed(2)}s\n`);
+}
+
 export async function run(options: RunOptions = {}): Promise<void> {
   const {
     stdout = process.stdout,
