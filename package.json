@@ -1,6 +1,6 @@
 {
   "name": "mictotext",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Record audio from Mac microphone and transcribe locally via whisperkit-cli",
   "type": "module",
   "bin": {
