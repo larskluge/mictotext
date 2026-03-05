@@ -45,12 +45,11 @@ describe('sync-version.ts', () => {
   it('pre-commit mode anticipates the pending commit (+1 patch vs prepack)', {
     skip: !isDirty && 'working tree is clean',
   }, async () => {
-    const [{ version: prepack }, { version: preCommit }] = await Promise.all([
-      execFileAsync('node', [syncScript], { cwd: root })
-        .then(() => JSON.parse(readFileSync(pkgPath, 'utf-8'))),
-      execFileAsync('node', [syncScript, '--pre-commit'], { cwd: root })
-        .then(() => JSON.parse(readFileSync(pkgPath, 'utf-8'))),
-    ]);
+    await execFileAsync('node', [syncScript], { cwd: root });
+    const { version: prepack } = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+
+    await execFileAsync('node', [syncScript, '--pre-commit'], { cwd: root });
+    const { version: preCommit } = JSON.parse(readFileSync(pkgPath, 'utf-8'));
 
     const prepackPatch = Number(prepack.replace(/-dirty$/, '').split('.')[2]);
     const preCommitPatch = Number(preCommit.split('.')[2]);
