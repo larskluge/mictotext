@@ -13,6 +13,7 @@ export interface RecordOptions {
   maxDurationSec?: number;
   signal?: AbortSignal;
   outputPath?: string;
+  onReady?: () => void;
 }
 
 export interface RecordResult {
@@ -21,7 +22,7 @@ export interface RecordResult {
 }
 
 export async function record(options: RecordOptions = {}): Promise<RecordResult> {
-  const { maxDurationSec, signal, outputPath } = options;
+  const { maxDurationSec, signal, outputPath, onReady } = options;
 
   const filePath =
     outputPath ??
@@ -45,11 +46,27 @@ export async function record(options: RecordOptions = {}): Promise<RecordResult>
     // detached: true puts ffmpeg in its own process group so terminal
     // Ctrl-C doesn't kill it directly — we send SIGINT ourselves, giving
     // ffmpeg time to finalize the WAV header before exiting.
-    const child = spawn('ffmpeg', args, { stdio: ['ignore', 'ignore', 'ignore'], detached: true });
+    const child = spawn('ffmpeg', args, { stdio: ['ignore', 'ignore', 'pipe'], detached: true });
+
+    let readyFired = false;
+    const fireReady = () => {
+      if (!readyFired) {
+        readyFired = true;
+        onReady?.();
+      }
+    };
+
+    // ffmpeg prints "size=" progress lines to stderr once recording begins
+    child.stderr!.on('data', (chunk: Buffer) => {
+      if (!readyFired && chunk.toString().includes('size=')) {
+        fireReady();
+      }
+    });
 
     child.on('error', reject);
 
     child.on('close', (code: number | null) => {
+      fireReady(); // in case stderr never showed "size="
       // ffmpeg exits 255 when killed by SIGINT, which is expected
       if (code === 0 || code === 255 || code === null) {
         resolve();

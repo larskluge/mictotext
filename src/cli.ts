@@ -67,11 +67,13 @@ export async function run(options: RunOptions = {}): Promise<void> {
   write(stderr, ' ready.');
 
   // 2. Record
-  write(stderr, ' Recording now... (press Ctrl-C to stop)\n');
-
   let filePath: string | undefined;
   try {
-    const recordResult = await record({ signal, maxDurationSec });
+    const recordResult = await record({
+      signal,
+      maxDurationSec,
+      onReady: () => write(stderr, ' Recording now... (press Ctrl-C to stop)\n'),
+    });
     filePath = recordResult.filePath;
 
     write(stderr, `Recorded ${recordResult.durationSec.toFixed(1)}s of audio.\n`);
