@@ -2,6 +2,18 @@
 
 Record audio from your Mac microphone and transcribe it locally using [whisperkit-cli](https://github.com/argmaxinc/WhisperKit).
 
+## Prerequisites
+
+- **ffmpeg** — for recording audio from the microphone
+  ```bash
+  brew install ffmpeg
+  ```
+- **whisperkit-cli** — for local transcription
+  ```bash
+  brew install whisperkit-cli
+  ```
+  For other installation methods see [WhisperKit Installation](https://github.com/argmaxinc/WhisperKit?tab=readme-ov-file#installation).
+
 ## Usage
 
 ```bash
