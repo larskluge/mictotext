@@ -75,9 +75,19 @@ export async function record(options: RecordOptions = {}): Promise<RecordResult>
       }
     });
 
+    // Safety net: if mictotext exits unexpectedly, kill ffmpeg.
+    // Needed because detached: true puts ffmpeg in its own process group.
+    const onExit = () => { child.kill('SIGKILL'); };
+    process.on('exit', onExit);
+    child.on('close', () => { process.removeListener('exit', onExit); });
+
     if (signal) {
       const onAbort = () => {
         child.kill('SIGINT');
+        // Escalate to SIGKILL if ffmpeg ignores SIGINT
+        const killTimer = setTimeout(() => { child.kill('SIGKILL'); }, 2000);
+        killTimer.unref();
+        child.on('close', () => clearTimeout(killTimer));
       };
       if (signal.aborted) {
         onAbort();
